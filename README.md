@@ -205,7 +205,7 @@ The project uses **synthetically generated data** that mimics the structure and 
 ##  Author
 
 University Machine Learning Semester Project
-
+Amat Ullah
 ---
 
 ##  License
