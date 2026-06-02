@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Network Intrusion Detection Report - Printable analysis summary">
+    <title>Report | Network Intrusion Detection System</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+   
+    <nav class="navbar" id="main-nav">
+        <a href="/" class="nav-brand">
+            <span class="nav-title">NIDS <span> Intrusion Detection</span></span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/report" class="active">Report</a></li>
+        </ul>
+        <div class="nav-status">
+            <span class="status-dot"></span>
+            System Online
+        </div>
+    </nav>
+
+ 
+    <div class="report-page" id="report-page">
+        <div class="report-card">
+
+
+            <div class="report-header">
+                <h1> Intrusion Detection Report</h1>
+                <p style="color: var(--text-secondary);">
+                    Generated on {{ results.timestamp }}
+                </p>
+            </div>
+
+          
+            <div class="report-section">
+                <h2> Analysis Summary</h2>
+                <div class="report-grid">
+                    <div class="report-stat">
+                        <div class="label">Total Records</div>
+                        <div class="value">{{ results.total_records }}</div>
+                    </div>
+                    <div class="report-stat">
+                        <div class="label">Normal Traffic</div>
+                        <div class="value" style="color: var(--success);">{{ results.normal_count }}</div>
+                    </div>
+                    <div class="report-stat">
+                        <div class="label">Attacks Detected</div>
+                        <div class="value" style="color: var(--danger);">{{ results.attack_count }}</div>
+                    </div>
+                    <div class="report-stat">
+                        <div class="label">Severity Level</div>
+                        <div class="value" style="color:
+                            {% if results.severity_level == 'safe' %}var(--success)
+                            {% elif results.severity_level == 'warning' %}var(--warning)
+                            {% else %}var(--danger){% endif %};">
+                            {{ results.severity_level | upper }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+  
+            {% if results.attack_distribution %}
+            <div class="report-section">
+                <h2> Attack Distribution</h2>
+                <div class="report-grid">
+                    {% for attack_type, count in results.attack_distribution.items() %}
+                    <div class="report-stat">
+                        <div class="label">{{ attack_type }}</div>
+                        <div class="value">{{ count }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+
+            <div class="report-section">
+                <h2> Model Performance (Random Forest)</h2>
+                <div class="report-grid">
+                    <div class="report-stat">
+                        <div class="label">Accuracy</div>
+                        <div class="value">{{ "%.1f"|format(results.metrics.accuracy * 100) }}%</div>
+                    </div>
+                    <div class="report-stat">
+                        <div class="label">Precision</div>
+                        <div class="value">{{ "%.1f"|format(results.metrics.precision * 100) }}%</div>
+                    </div>
+                    <div class="report-stat">
+                        <div class="label">Recall</div>
+                        <div class="value">{{ "%.1f"|format(results.metrics.recall * 100) }}%</div>
+                    </div>
+                    <div class="report-stat">
+                        <div class="label">F1 Score</div>
+                        <div class="value">{{ "%.1f"|format(results.metrics.f1 * 100) }}%</div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="report-section">
+                <h2> Model Comparison</h2>
+                <div class="table-container" style="border: none;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Accuracy</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for model in results.model_comparison %}
+                            <tr>
+                                <td style="font-weight: 600;">{{ model.name }}</td>
+                                <td>
+                                    <span class="confidence-text">
+                                        {{ "%.1f"|format(model.accuracy * 100) }}%
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if model.name == 'Random Forest' %}
+                                    <span class="prediction-badge normal"> DEPLOYED</span>
+                                    {% else %}
+                                    <span class="prediction-badge probe">Comparison</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="report-section">
+                <h2> Predictions Summary</h2>
+                <div class="table-container" style="border: none;">
+                    <div class="table-scroll" style="max-height: 500px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Record ID</th>
+                                    <th>Prediction</th>
+                                    <th>Confidence</th>
+                                    <th>Risk Level</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pred in results.predictions[:30] %}
+                                <tr>
+                                    <td>#{{ pred.id }}</td>
+                                    <td>
+                                        <span class="prediction-badge {{ pred.prediction | lower }}">
+                                            {{ pred.prediction }}
+                                        </span>
+                                    </td>
+                                    <td>{{ pred.confidence }}%</td>
+                                    <td>
+                                        <span class="risk-badge {{ pred.risk_level | lower }}">
+                                            <span class="risk-dot {{ pred.risk_level | lower }}"></span>
+                                            {{ pred.risk_level }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if results.predictions | length > 30 %}
+                    <div style="padding: 1rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+                        Showing first 30 of {{ results.predictions | length }} records.
+                        Download the PDF report for the full list.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="btn-group" style="margin-top: 2rem;">
+                <a href="/download-report" class="btn btn-primary"> Download PDF Report</a>
+                <button onclick="window.print()" class="btn btn-secondary">Print Report</button>
+                <a href="/dashboard" class="btn btn-secondary"> Back to Dashboard</a>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>Network Intrusion Detection System — University ML Project</p>
+        <p>Built with Flask, Scikit-learn & Chart.js</p>
+    </footer>
+
+</body>
+</html>

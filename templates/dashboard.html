@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Network Intrusion Detection Dashboard - View analysis results and threat predictions">
+    <title>Dashboard | Network Intrusion Detection System</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+    <nav class="navbar" id="main-nav">
+        <a href="/" class="nav-brand">
+            <span class="nav-title">NIDS <span> Intrusion Detection</span></span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/dashboard" class="active">Dashboard</a></li>
+            <li><a href="/report">Report</a></li>
+        </ul>
+        <div class="nav-status">
+            <span class="status-dot"></span>
+            System Online
+        </div>
+    </nav>
+
+
+        <div class="dashboard-header">
+            <div>
+                <h1>Analysis <span class="gradient-text">Dashboard</span></h1>
+                <div class="timestamp"> {{ results.timestamp }}</div>
+            </div>
+            <div class="btn-group">
+                <a href="/download-report" class="btn btn-primary"> Download PDF Report</a>
+                <a href="/" class="btn btn-secondary"> New Analysis</a>
+            </div>
+        </div>
+
+    
+        <div class="summary-cards" id="summary-cards">
+            <!-- Total Records -->
+            <div class="summary-card total">
+                <div class="card-label">Total Records</div>
+                <div class="card-value text-blue" id="total-records">{{ results.total_records }}</div>
+            </div>
+            <!-- Normal Traffic -->
+            <div class="summary-card normal">
+                <div class="card-label">Normal Traffic</div>
+                <div class="card-value text-green" id="normal-count">{{ results.normal_count }}</div>
+            </div>
+            <!-- Attacks Detected -->
+            <div class="summary-card attacks">
+                <div class="card-label">Attacks Detected</div>
+                <div class="card-value text-red" id="attack-count">{{ results.attack_count }}</div>
+            </div>
+            <!-- Detection Accuracy -->
+            <div class="summary-card accuracy">
+                <div class="card-label">Detection Accuracy</div>
+                <div class="card-value text-purple" id="accuracy-value">{{ "%.1f"|format(results.metrics.accuracy * 100) }}%</div>
+            </div>
+        </div>
+
+
+        <div class="severity-section" id="severity-section">
+            <div class="section-title">⚡ Attack Severity Meter</div>
+            <div class="severity-meter">
+                <div class="meter-header">
+                    <span class="meter-label">Threat Level</span>
+                    <span class="meter-status {{ results.severity_level }}" id="severity-status">
+                        {{ results.severity_level | upper }}
+                    </span>
+                </div>
+                <!-- Animated progress bar -->
+                <div class="meter-bar">
+                    <div class="meter-fill {{ results.severity_level }}"
+                         id="severity-fill"
+                         style="width: {{ results.attack_percentage }}%"></div>
+                </div>
+                <div class="meter-labels">
+                    <span>🟢 Safe (0%)</span>
+                    <span>🟡 Warning (20%)</span>
+                    <span>🔴 Dangerous (50%+)</span>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="metrics-section" id="metrics-section">
+            <div class="section-title"> Model Performance Metrics (Random Forest)</div>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Accuracy</div>
+                    <div class="metric-value">{{ "%.1f"|format(results.metrics.accuracy * 100) }}%</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Precision</div>
+                    <div class="metric-value">{{ "%.1f"|format(results.metrics.precision * 100) }}%</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Recall</div>
+                    <div class="metric-value">{{ "%.1f"|format(results.metrics.recall * 100) }}%</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">F1 Score</div>
+                    <div class="metric-value">{{ "%.1f"|format(results.metrics.f1 * 100) }}%</div>
+                </div>
+            </div>
+        </div>
+
+   
+        <div class="charts-section" id="charts-section">
+            <div class="section-title"> Visual Analytics</div>
+            <div class="charts-grid">
+                <!-- Pie Chart: Normal vs Attack -->
+                <div class="chart-card">
+                    <div class="chart-title"> Traffic Distribution</div>
+                    <div class="chart-container">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+                <!-- Bar Chart: Attack Types -->
+                <div class="chart-card">
+                    <div class="chart-title"> Attack Type Breakdown</div>
+                    <div class="chart-container">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+                <!-- Accuracy Comparison Chart -->
+                <div class="chart-card">
+                    <div class="chart-title"> Model Accuracy Comparison</div>
+                    <div class="chart-container">
+                        <canvas id="comparisonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="table-section" id="table-section">
+            <div class="table-container">
+                <div class="table-header">
+                    <h3> Prediction Results</h3>
+                    <span style="color: var(--text-muted); font-size: 0.8rem;">
+                        Showing {{ results.predictions | length }} records
+                    </span>
+                </div>
+                <div class="table-scroll">
+                    <table id="predictions-table">
+                        <thead>
+                            <tr>
+                                <th>Record ID</th>
+                                <th>Prediction</th>
+                                <th>Confidence</th>
+                                <th>Risk Level</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pred in results.predictions %}
+                            <tr>
+                                <!-- Record ID -->
+                                <td>#{{ pred.id }}</td>
+
+                                <!-- Prediction Badge -->
+                                <td>
+                                    <span class="prediction-badge {{ pred.prediction | lower }}">
+                                        {{ pred.prediction }}
+                                    </span>
+                                </td>
+
+                                <!-- Confidence Bar -->
+                                <td>
+                                    <div class="confidence-bar">
+                                        <div class="confidence-track">
+                                            <div class="confidence-fill"
+                                                 style="width: {{ pred.confidence }}%"></div>
+                                        </div>
+                                        <span class="confidence-text">{{ pred.confidence }}%</span>
+                                    </div>
+                                </td>
+
+                                <!-- Risk Level Badge -->
+                                <td>
+                                    <span class="risk-badge {{ pred.risk_level | lower }}">
+                                        <span class="risk-dot {{ pred.risk_level | lower }}"></span>
+                                        {{ pred.risk_level }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="footer">
+        <p>Network Intrusion Detection System — University ML Project</p>
+        <p>Built with Flask, Scikit-learn & Chart.js</p>
+    </footer>
+
+    <!-- ============================================
+         CHART DATA (passed from Flask to JavaScript)
+         ============================================ -->
+    <script>
+        // Pass Python data to JavaScript via JSON
+        const RESULTS = {
+            normalCount:       {{ results.normal_count }},
+            attackCount:        {{ results.attack_count }},
+            attackDistribution: {{ results.attack_distribution | tojson }},
+            modelComparison:   {{ results.model_comparison | tojson }}
+        };
+    </script>
+
+    <!-- Dashboard Chart Script -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+</body>
+</html>

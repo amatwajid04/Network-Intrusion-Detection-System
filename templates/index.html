@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Network Intrusion Detection System - Upload network traffic data for ML-powered threat analysis">
+    <title>Network Intrusion Detection System | Home</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+
+    <nav class="navbar" id="main-nav">
+        <a href="/" class="nav-brand">
+            <span class="nav-title">NIDS <span> Intrusion Detection</span></span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="/" class="active">Home</a></li>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/report">Report</a></li>
+        </ul>
+        <div class="nav-status">
+            <span class="status-dot"></span>
+            System Online
+        </div>
+    </nav>
+
+
+    <main class="hero" id="hero-section">
+        <!-- Badge -->
+        <div class="hero-badge">
+            🤖 Powered by Random Forest ML Model
+        </div>
+
+        <!-- Title -->
+        <h1>
+            Network <span class="gradient-text">Intrusion Detection</span><br>
+            System
+        </h1>
+
+        <!-- Description -->
+        <p class="hero-description">
+            Upload your network traffic data and our machine learning model will
+            analyze each connection to detect potential security threats including
+            DoS, Probe, R2L, and U2R attacks.
+        </p>
+
+        <!-- Error Message (shown if there's an error) -->
+        {% if error %}
+        <div class="error-banner" id="error-banner">
+            ⚠️ {{ error }}
+        </div>
+        {% endif %}
+
+
+        <div class="upload-section">
+            <form action="/analyze" method="POST" enctype="multipart/form-data" id="upload-form">
+
+                <!-- Drag & Drop Upload Card -->
+                <div class="upload-card" id="upload-card">
+                    <span class="upload-icon">📁</span>
+                    <div class="upload-title">Drop your CSV file here</div>
+                    <div class="upload-subtitle">or click to browse • CSV format only</div>
+
+                    <!-- Hidden file input -->
+                    <input type="file" name="file" id="file-input"
+                           class="file-input" accept=".csv" required>
+
+                    <!-- File name display (shown after selection) -->
+                    <div class="file-name" id="file-name">
+                        📄 <span id="file-name-text"></span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary" id="analyze-btn" disabled>
+                        🔍 Start Analysis
+                    </button>
+                    <a href="{{ url_for('static', filename='../dataset/sample_data.csv') }}"
+                       class="btn btn-secondary" download>
+                        📥 Download Sample CSV
+                    </a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <section class="features" id="features-section">
+        <div class="feature-card">
+            <div class="feature-icon">🤖</div>
+            <h3>ML-Powered Detection</h3>
+            <p>Random Forest classifier trained on NSL-KDD dataset patterns to identify 5 types of network traffic.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Visual Dashboard</h3>
+            <p>Interactive charts and graphs showing attack distribution, model accuracy, and severity levels.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📋</div>
+            <h3>PDF Reports</h3>
+            <p>Download comprehensive PDF reports with analysis results, statistics, and prediction summaries.</p>
+        </div>
+    </section>
+
+
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner-lg"></div>
+        <div class="loading-text">Analyzing network traffic data...</div>
+    </div>
+
+
+    <footer class="footer">
+        <p> Network Intrusion Detection System — University ML Project</p>
+        <p>Built with Flask, Scikit-learn & Chart.js</p>
+    </footer>
+
+   
+    <script>
+        // ---- Get DOM Elements ----
+        const uploadCard   = document.getElementById('upload-card');
+        const fileInput    = document.getElementById('file-input');
+        const fileName     = document.getElementById('file-name');
+        const fileNameText = document.getElementById('file-name-text');
+        const analyzeBtn   = document.getElementById('analyze-btn');
+        const uploadForm   = document.getElementById('upload-form');
+        const loadingOverlay = document.getElementById('loading-overlay');
+
+        // ---- Click on card opens file browser ----
+        uploadCard.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // ---- When file is selected, show the filename ----
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                fileNameText.textContent = file.name;
+                fileName.classList.add('visible');
+                analyzeBtn.disabled = false;
+                uploadCard.style.borderColor = 'var(--accent-cyan)';
+            }
+        });
+
+        // ---- Drag & Drop Support ----
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadCard.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        });
+
+        // Highlight card when dragging over
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadCard.addEventListener(eventName, () => {
+                uploadCard.classList.add('drag-over');
+            });
+        });
+
+        // Remove highlight when leaving
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadCard.addEventListener(eventName, () => {
+                uploadCard.classList.remove('drag-over');
+            });
+        });
+
+        // Handle dropped file
+        uploadCard.addEventListener('drop', (e) => {
+            const droppedFile = e.dataTransfer.files[0];
+            if (droppedFile && droppedFile.name.endsWith('.csv')) {
+                // Create a new DataTransfer to set the file input
+                const dt = new DataTransfer();
+                dt.items.add(droppedFile);
+                fileInput.files = dt.files;
+
+                fileNameText.textContent = droppedFile.name;
+                fileName.classList.add('visible');
+                analyzeBtn.disabled = false;
+                uploadCard.style.borderColor = 'var(--accent-cyan)';
+            } else {
+                alert('Please upload a CSV file.');
+            }
+        });
+
+        // ---- Show loading overlay on form submit ----
+        uploadForm.addEventListener('submit', () => {
+            loadingOverlay.classList.add('active');
+        });
+    </script>
+
+</body>
+</html>
