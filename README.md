@@ -4,7 +4,6 @@ A web-based **Machine Learning** application that analyzes network traffic data 
 
 Built as a university semester project using **Flask**, **Scikit-learn**, and **Chart.js**.
 
----
 
 ##  Project Overview
 
@@ -25,7 +24,6 @@ Built as a university semester project using **Flask**, **Scikit-learn**, and **
 4. **Visualizes** results with interactive charts and a severity meter
 5. **Generates** downloadable PDF reports
 
----
 
 ##  Installation Steps
 
@@ -68,7 +66,7 @@ python app.py
 
 Navigate to: **http://127.0.0.1:5000**
 
----
+
 
 ##  Project Structure
 
@@ -101,7 +99,7 @@ network_intrusion_detection/
 └── README.md                   # This file
 ```
 
----
+
 
 ##  Dataset Information
 
@@ -142,7 +140,7 @@ The project uses **synthetically generated data** that mimics the structure and 
 | **R2L** | Remote-to-Local unauthorized access | 🔴 High |
 | **U2R** | User-to-Root privilege escalation | 🔴 High |
 
----
+
 
 ##  Machine Learning Details
 
@@ -161,7 +159,7 @@ The project uses **synthetically generated data** that mimics the structure and 
 - **Recall** — Of real attacks, how many were detected?
 - **F1 Score** — Harmonic mean of precision and recall
 
----
+
 
 ##  Screenshots
 
@@ -171,7 +169,7 @@ The project uses **synthetically generated data** that mimics the structure and 
 2. **Dashboard** — Summary cards, severity meter, and interactive charts
 3. **Report** — Printable analysis report with PDF download
 
----
+
 
 ##  Future Improvements
 
@@ -185,7 +183,7 @@ The project uses **synthetically generated data** that mimics the structure and 
 - [ ] Model retraining through the web interface
 - [ ] API endpoint for external integrations
 
----
+
 
 ##  Technologies Used
 
@@ -200,13 +198,11 @@ The project uses **synthetically generated data** that mimics the structure and 
 | fpdf2 | PDF report generation |
 | HTML/CSS/JS | Frontend interface |
 
----
 
 ##  Author
 
 Amat Ullah University Machine Learning Semester Project
 
----
 
 ##  License
 
