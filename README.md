@@ -1,4 +1,4 @@
-# 🛡️ Network Intrusion Detection System
+#  Network Intrusion Detection System
 
 A web-based **Machine Learning** application that analyzes network traffic data and predicts whether connections are **Normal** or one of four attack types: **DoS**, **Probe**, **R2L**, or **U2R**.
 
@@ -6,7 +6,7 @@ Built as a university semester project using **Flask**, **Scikit-learn**, and **
 
 ---
 
-## 📋 Project Overview
+##  Project Overview
 
 | Feature | Details |
 |---------|---------|
@@ -27,7 +27,7 @@ Built as a university semester project using **Flask**, **Scikit-learn**, and **
 
 ---
 
-## 🚀 Installation Steps
+##  Installation Steps
 
 ### Prerequisites
 
@@ -70,7 +70,7 @@ Navigate to: **http://127.0.0.1:5000**
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 network_intrusion_detection/
@@ -103,7 +103,7 @@ network_intrusion_detection/
 
 ---
 
-## 📊 Dataset Information
+##  Dataset Information
 
 ### NSL-KDD Dataset (Synthetic Version)
 
@@ -144,7 +144,7 @@ The project uses **synthetically generated data** that mimics the structure and 
 
 ---
 
-## 🤖 Machine Learning Details
+##  Machine Learning Details
 
 ### Models Compared
 
@@ -163,7 +163,7 @@ The project uses **synthetically generated data** that mimics the structure and 
 
 ---
 
-## 🖼️ Screenshots
+##  Screenshots
 
 > Add screenshots here after running the application.
 
@@ -173,7 +173,7 @@ The project uses **synthetically generated data** that mimics the structure and 
 
 ---
 
-## 🔮 Future Improvements
+##  Future Improvements
 
 - [ ] Use the real NSL-KDD dataset for training
 - [ ] Add more ML models (SVM, Neural Network, XGBoost)
@@ -187,7 +187,7 @@ The project uses **synthetically generated data** that mimics the structure and 
 
 ---
 
-## 🛠️ Technologies Used
+##  Technologies Used
 
 | Technology | Purpose |
 |-----------|---------|
@@ -202,12 +202,12 @@ The project uses **synthetically generated data** that mimics the structure and 
 
 ---
 
-## 👤 Author
+##  Author
 
 University Machine Learning Semester Project
 
 ---
 
-## 📄 License
+##  License
 
 This project is for educational purposes only.
